@@ -1,3 +1,3 @@
-module github.com/SlinSo/copier
+module github.com/seambiz/copier
 
 go 1.14

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/SlinSo/copier"
+	"github.com/seambiz/copier"
 )
 
 type User struct {

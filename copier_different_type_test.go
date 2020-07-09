@@ -3,7 +3,7 @@ package copier_test
 import (
 	"testing"
 
-	"github.com/SlinSo/copier"
+	"github.com/seambiz/copier"
 )
 
 type TypeStruct1 struct {

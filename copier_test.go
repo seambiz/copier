@@ -13,6 +13,7 @@ type User struct {
 	Name     string
 	Birthday *time.Time
 	Nickname string
+	Hair     string
 	Role     string
 	Age      int32
 	FakeAge  *int32
@@ -33,12 +34,17 @@ type Employee struct {
 	EmployeID int64
 	DoubleAge int32
 	SuperRule string
+	Hairstyle string
 	Notes     []string
 	flags     []byte
 }
 
 func (employee *Employee) Role(role string) {
 	employee.SuperRule = "Super " + role
+}
+
+func (employee *Employee) SetHair(hair string) {
+	employee.Hairstyle = hair
 }
 
 func checkEmployee(employee Employee, user User, t *testing.T, testCase string) {
@@ -69,6 +75,9 @@ func checkEmployee(employee Employee, user User, t *testing.T, testCase string) 
 	}
 	if employee.SuperRule != "Super "+user.Role {
 		t.Errorf("%v: Copy to method doesn't work", testCase)
+	}
+	if employee.Hairstyle != "megacool" {
+		t.Errorf("%v: Copy to Set method doesn't work", testCase)
 	}
 	if !reflect.DeepEqual(employee.Notes, user.Notes) {
 		t.Errorf("%v: Copy from slice doen't work", testCase)
@@ -104,7 +113,7 @@ func checkEmployee2(employee Employee, user *User, t *testing.T, testCase string
 
 func TestCopyStruct(t *testing.T) {
 	var fakeAge int32 = 12
-	user := User{Name: "Jinzhu", Nickname: "jinzhu", Age: 18, FakeAge: &fakeAge, Role: "Admin", Notes: []string{"hello world", "welcome"}, flags: []byte{'x'}}
+	user := User{Name: "Jinzhu", Nickname: "jinzhu", Age: 18, FakeAge: &fakeAge, Role: "Admin", Notes: []string{"hello world", "welcome"}, flags: []byte{'x'}, Hair: "megacool"}
 	employee := Employee{}
 
 	if err := copier.Copy(employee, &user); err == nil {

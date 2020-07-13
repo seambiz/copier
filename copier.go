@@ -89,6 +89,14 @@ func Copy(toValue interface{}, fromValue interface{}) (err error) {
 							toMethod = dest.MethodByName(name)
 						}
 
+						if !toMethod.IsValid() {
+							if dest.CanAddr() {
+								toMethod = dest.Addr().MethodByName("Set" + name)
+							} else {
+								toMethod = dest.MethodByName("Set" + name)
+							}
+						}
+
 						if toMethod.IsValid() && toMethod.Type().NumIn() == 1 && fromField.Type().AssignableTo(toMethod.Type().In(0)) {
 							toMethod.Call([]reflect.Value{fromField})
 						}

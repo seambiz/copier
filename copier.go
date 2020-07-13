@@ -83,17 +83,19 @@ func Copy(toValue interface{}, fromValue interface{}) (err error) {
 					} else {
 						// try to set to method
 						var toMethod reflect.Value
+
+						// test for "Set" first, because Setter may include custom logic
 						if dest.CanAddr() {
-							toMethod = dest.Addr().MethodByName(name)
+							toMethod = dest.Addr().MethodByName("Set" + name)
 						} else {
-							toMethod = dest.MethodByName(name)
+							toMethod = dest.MethodByName("Set" + name)
 						}
 
 						if !toMethod.IsValid() {
 							if dest.CanAddr() {
-								toMethod = dest.Addr().MethodByName("Set" + name)
+								toMethod = dest.Addr().MethodByName(name)
 							} else {
-								toMethod = dest.MethodByName("Set" + name)
+								toMethod = dest.MethodByName(name)
 							}
 						}
 

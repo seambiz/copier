@@ -138,7 +138,7 @@ func TestCopyStruct(t *testing.T) {
 }
 
 func TestCopyFromStructToSlice(t *testing.T) {
-	user := User{Name: "Jinzhu", Age: 18, Role: "Admin", Notes: []string{"hello world"}}
+	user := User{Name: "Jinzhu", Age: 18, Role: "Admin", Notes: []string{"hello world"}, Hair: "megacool"}
 	employees := []Employee{}
 
 	if err := copier.Copy(employees, &user); err != nil && len(employees) != 0 {
@@ -174,7 +174,7 @@ func TestCopyFromStructToSlice(t *testing.T) {
 }
 
 func TestCopyFromSliceToSlice(t *testing.T) {
-	users := []User{{Name: "Jinzhu", Age: 18, Role: "Admin", Notes: []string{"hello world"}}, {Name: "Jinzhu2", Age: 22, Role: "Dev", Notes: []string{"hello world", "hello"}}}
+	users := []User{{Name: "Jinzhu", Age: 18, Role: "Admin", Notes: []string{"hello world"}, Hair: "megacool"}, {Name: "Jinzhu2", Age: 22, Role: "Dev", Notes: []string{"hello world", "hello"}, Hair: "megacool"}}
 	employees := []Employee{}
 
 	if copier.Copy(&employees, users); len(employees) != 2 {
@@ -210,7 +210,7 @@ func TestCopyFromSliceToSlice(t *testing.T) {
 }
 
 func TestCopyFromSliceToSlice2(t *testing.T) {
-	users := []*User{{Name: "Jinzhu", Age: 18, Role: "Admin", Notes: []string{"hello world"}}, nil}
+	users := []*User{{Name: "Jinzhu", Age: 18, Role: "Admin", Notes: []string{"hello world"}, Hair: "megacool"}, nil}
 	employees := []Employee{}
 
 	if copier.Copy(&employees, users); len(employees) != 2 {

@@ -35,6 +35,7 @@ type Employee struct {
 	DoubleAge int32
 	SuperRule string
 	Hairstyle string
+	Hair      string
 	Notes     []string
 	flags     []byte
 }

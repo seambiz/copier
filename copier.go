@@ -71,36 +71,40 @@ func Copy(toValue interface{}, fromValue interface{}) (err error) {
 				name := field.Name
 
 				if fromField := source.FieldByName(name); fromField.IsValid() {
-					// has field
-					if toField := dest.FieldByName(name); toField.IsValid() {
-						if toField.CanSet() {
-							if !set(toField, fromField) {
-								if err := Copy(toField.Addr().Interface(), fromField.Interface()); err != nil {
-									return err
+					// try to set to method first before field
+					var toMethod reflect.Value
+					methodCalled := false
+
+					// test for "Set" first, because Setter may include custom logic
+					if dest.CanAddr() {
+						toMethod = dest.Addr().MethodByName("Set" + name)
+					} else {
+						toMethod = dest.MethodByName("Set" + name)
+					}
+
+					if !toMethod.IsValid() {
+						if dest.CanAddr() {
+							toMethod = dest.Addr().MethodByName(name)
+						} else {
+							toMethod = dest.MethodByName(name)
+						}
+					}
+
+					if toMethod.IsValid() && toMethod.Type().NumIn() == 1 && fromField.Type().AssignableTo(toMethod.Type().In(0)) {
+						toMethod.Call([]reflect.Value{fromField})
+						methodCalled = true
+					}
+
+					if !methodCalled {
+						// has field
+						if toField := dest.FieldByName(name); toField.IsValid() {
+							if toField.CanSet() {
+								if !set(toField, fromField) {
+									if err := Copy(toField.Addr().Interface(), fromField.Interface()); err != nil {
+										return err
+									}
 								}
 							}
-						}
-					} else {
-						// try to set to method
-						var toMethod reflect.Value
-
-						// test for "Set" first, because Setter may include custom logic
-						if dest.CanAddr() {
-							toMethod = dest.Addr().MethodByName("Set" + name)
-						} else {
-							toMethod = dest.MethodByName("Set" + name)
-						}
-
-						if !toMethod.IsValid() {
-							if dest.CanAddr() {
-								toMethod = dest.Addr().MethodByName(name)
-							} else {
-								toMethod = dest.MethodByName(name)
-							}
-						}
-
-						if toMethod.IsValid() && toMethod.Type().NumIn() == 1 && fromField.Type().AssignableTo(toMethod.Type().In(0)) {
-							toMethod.Call([]reflect.Value{fromField})
 						}
 					}
 				}

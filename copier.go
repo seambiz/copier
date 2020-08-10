@@ -70,7 +70,7 @@ func Copy(toValue interface{}, fromValue interface{}) (err error) {
 			for _, field := range fromTypeFields {
 				name := field.Name
 
-				if fromField := source.FieldByName(name); fromField.IsValid() {
+				if fromField := source.FieldByName(name); fromField.IsValid() && !(fromField.Kind() == reflect.Ptr && fromField.IsNil()) {
 					// try to set to method first before field
 					var toMethod reflect.Value
 					methodCalled := false
@@ -89,10 +89,14 @@ func Copy(toValue interface{}, fromValue interface{}) (err error) {
 							toMethod = dest.MethodByName(name)
 						}
 					}
+					if toMethod.IsValid() && toMethod.Type().NumIn() == 1 {
+						fromType := indirectType(fromField.Type())
+						toType := indirectType(toMethod.Type().In(0))
 
-					if toMethod.IsValid() && toMethod.Type().NumIn() == 1 && fromField.Type().AssignableTo(toMethod.Type().In(0)) {
-						toMethod.Call([]reflect.Value{fromField})
-						methodCalled = true
+						if fromType.AssignableTo(toType) {
+							toMethod.Call([]reflect.Value{indirect(fromField)})
+							methodCalled = true
+						}
 					}
 
 					if !methodCalled {

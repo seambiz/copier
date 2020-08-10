@@ -10,15 +10,18 @@ import (
 )
 
 type User struct {
-	Name     string
-	Birthday *time.Time
-	Nickname string
-	Hair     string
-	Role     string
-	Age      int32
-	FakeAge  *int32
-	Notes    []string
-	flags    []byte
+	Name        string
+	Birthday    *time.Time
+	Nickname    string
+	Hair        string
+	Role        string
+	Age         int32
+	FakeAge     *int32
+	Notes       []string
+	flags       []byte
+	ExtSystemID string `json:"ext_system_id"`
+	CountryISO  string `json:"country_iso"`
+	OptName     *string
 }
 
 func (user User) DoubleAge() int32 {
@@ -36,8 +39,13 @@ type Employee struct {
 	SuperRule string
 	Hairstyle string
 	Hair      string
+	optname   string
 	Notes     []string
 	flags     []byte
+	embedded  struct {
+		ExtSystemID string
+		CountryISO  string
+	}
 }
 
 func (employee *Employee) Role(role string) {
@@ -46,6 +54,18 @@ func (employee *Employee) Role(role string) {
 
 func (employee *Employee) SetHair(hair string) {
 	employee.Hairstyle = hair
+}
+
+func (employee *Employee) SetExtSystemID(v string) {
+	employee.embedded.ExtSystemID = v
+}
+
+func (employee *Employee) SetCountryISO(v string) {
+	employee.embedded.CountryISO = v
+}
+
+func (employee *Employee) SetOptName(v string) {
+	employee.optname = v
 }
 
 func checkEmployee(employee Employee, user User, t *testing.T, testCase string) {
@@ -83,6 +103,15 @@ func checkEmployee(employee Employee, user User, t *testing.T, testCase string) 
 	if !reflect.DeepEqual(employee.Notes, user.Notes) {
 		t.Errorf("%v: Copy from slice doen't work", testCase)
 	}
+	if employee.embedded.ExtSystemID != user.ExtSystemID {
+		t.Errorf("%v: ExtSystemID haven't been copied correctly.", testCase)
+	}
+	if employee.embedded.CountryISO != user.CountryISO {
+		t.Errorf("%v: CountryISO haven't been copied correctly.", testCase)
+	}
+	if user.OptName != nil && employee.optname != *user.OptName {
+		t.Errorf("%v: OptName haven't been copied correctly.", testCase)
+	}
 }
 
 func TestCopySameStructWithPointerField(t *testing.T) {
@@ -114,7 +143,8 @@ func checkEmployee2(employee Employee, user *User, t *testing.T, testCase string
 
 func TestCopyStruct(t *testing.T) {
 	var fakeAge int32 = 12
-	user := User{Name: "Jinzhu", Nickname: "jinzhu", Age: 18, FakeAge: &fakeAge, Role: "Admin", Notes: []string{"hello world", "welcome"}, flags: []byte{'x'}, Hair: "megacool"}
+	var o string = "myopt"
+	user := User{Name: "Jinzhu", Nickname: "jinzhu", Age: 18, FakeAge: &fakeAge, Role: "Admin", Notes: []string{"hello world", "welcome"}, flags: []byte{'x'}, Hair: "megacool", ExtSystemID: "1001", CountryISO: "DE", OptName: &o}
 	employee := Employee{}
 
 	if err := copier.Copy(employee, &user); err == nil {

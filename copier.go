@@ -92,9 +92,14 @@ func Copy(toValue interface{}, fromValue interface{}) (err error) {
 					if toMethod.IsValid() && toMethod.Type().NumIn() == 1 {
 						fromType := indirectType(fromField.Type())
 						toType := indirectType(toMethod.Type().In(0))
+						isPtrType := toMethod.Type().In(0).Kind() == reflect.Ptr
 
 						if fromType.AssignableTo(toType) {
-							toMethod.Call([]reflect.Value{indirect(fromField)})
+							if isPtrType {
+								toMethod.Call([]reflect.Value{fromField})
+							} else {
+								toMethod.Call([]reflect.Value{indirect(fromField)})
+							}
 							methodCalled = true
 						}
 					}

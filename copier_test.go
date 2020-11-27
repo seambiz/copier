@@ -114,6 +114,29 @@ func checkEmployee(employee Employee, user User, t *testing.T, testCase string) 
 	}
 }
 
+type Nullable struct {
+	Name *string
+}
+
+func (n *Nullable) SetName(s *string) {
+	n.Name = s
+}
+
+type Message struct {
+	Name *string
+}
+
+func TestPtrProblems(t *testing.T) {
+	s := "msg"
+	msg := &Message{Name: &s}
+	nullable := &Nullable{}
+
+	err := copier.Copy(nullable, msg)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
 func TestCopySameStructWithPointerField(t *testing.T) {
 	var fakeAge int32 = 12
 	var currentTime time.Time = time.Now()
